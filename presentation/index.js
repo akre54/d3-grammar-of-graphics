@@ -182,13 +182,17 @@ export default class Presentation extends React.Component {
           <Slide transition={["zoom", "slide"]} bgColor="primary" notes="
             <ul>
               <li>
-                A chart is a
+                A chart is a collection of visual objects (like shapes) laid out according to the grammar of its particular chart type.
+                It is bound by the rules of its grammar and *isn't resuable*.
               </li>
               <li>
-
+                A graphic on the other hand, can take elements from different chart types. It isn't limited by the rules of a single
+                grammar, but it borrows from many different grammars at once. A pie chart is just a stacked bar chart in polar coordinates,
+                for instance, and a histogram has very different rules from a bar chart, though they may look visually similar.
               </li>
               <li>
-                Once you think in terms of composing the underlying grammar, you can create something much more suited to your dataset / story than any one type of chart
+                Once you think in terms of composing the underlying grammar, you can create something much more suited to your dataset / story
+                than any one type of chart can offer you.
               </li>
             </ul>
           ">
