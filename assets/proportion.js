@@ -9,6 +9,10 @@ const scale = scaleLinear()
                 .range([0, height])
                 .domain([0, max])
 
+const colorScale = scaleLinear()
+                .range(['#000', '#ff4081', '#fff'])
+                .domain([0, height / 2, height])
+
 export default class Proportion extends Component {
   constructor(props) {
     super(props)
@@ -51,7 +55,7 @@ export default class Proportion extends Component {
             </Text>
           </Fill>
           <Fill>
-            <Text textColor='primary'>
+            <Text textColor={colorScale(output)}>
               {output} px (y-position)
             </Text>
           </Fill>

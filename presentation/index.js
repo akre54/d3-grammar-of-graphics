@@ -8,9 +8,13 @@ import {
   Cite,
   CodePane,
   Deck,
+  Fit,
   Fill,
   Heading,
   Image,
+  Table,
+  TableRow,
+  TableItem,
   Layout,
   Link,
   ListItem,
@@ -48,6 +52,9 @@ const images = {
   waveform: require('../assets/waveform.jpg'),
   circularBarchart: require('../assets/circular_bar_chart.png'),
   scale: require('../assets/d3scale.png'),
+  scatterplot: require('../assets/scatterplot.png'),
+  nytWeather: require('../assets/nyt_weather.png'),
+  arcChart: require('../assets/arc_chart.png'),
   oilChart: require('../assets/oilchart.jpg'),
   grammarOfGraphics: require('../assets/grammar_of_graphics.jpg')
 }
@@ -90,7 +97,10 @@ export default class Presentation extends React.Component {
           <Slide transition={["slide"]} bgColor="secondary"
             notes="A lot of the core ideas of this talk are borrowed from Leland Wilkinson's book The Grammar of Graphics
                   and Hadley Wickham's paper A Layered Grammar of Graphics. Those guys are really smart.
-                  If you're interested, definitely check those out">
+                  If you're interested, definitely check those out.
+                  For those who are just getting into D3 from other graphics tools, Leland Wilkinson worked on SPSS and Tableau,
+                  and Hadley Wickham works on Rstudio and created ggplot.
+            ">
             <Image src={images.grammarOfGraphics.replace("/", "")} margin="0px auto 40px" height="100%"/>
           </Slide>
           <Slide transition={["slide"]} bgColor="secondary" notes="
@@ -120,13 +130,17 @@ export default class Presentation extends React.Component {
             <List>
               <ListItem>Graphic</ListItem>
               <ListItem>Grammar</ListItem>
+              <ListItem>Chart</ListItem>
               <ListItem>Bar Chart</ListItem>
               <ListItem>Scatterplot</ListItem>
             </List>
           </Slide>
           <Slide transition={["slide"]} notes="
-            Some visual representation of data, allows us to gain deeper insight into a story than just words or a dataset alone could.
-            There are many different types of graphics. Here are a few just to get a sense. I want you to pay attention to how the shapes retain or change their meaning as the type of graphic changes
+            Some visual representation of data, allows us to gain deeper insight into a story than just words or a table alone could.
+            There are many different types of graphics. Here are a few just to get a sense.
+            I want you to pay attention to how the shapes retain or change their meaning as the type of type changes
+            Graphics are better than words or tables for certain types of information because they capitalize on our rich ability as humans to recognize
+            spatial patterns (sizes, distances), colors, and relationships between colocated information
           ">
             <Heading size={1} caps lineHeight={1} margin="30px auto" textColor="secondary">
               What is a "graphic"?
@@ -144,13 +158,13 @@ export default class Presentation extends React.Component {
               <li>
                 You might represent categories by using distinct colors or shapes, or you might map
                 continuous values (like quantity, temperature, or price) to a spectrum of colors, positions, and sizes.
-                We call these 'Scales'
+                We call these mappings 'Scales'
               </li>
               <li>
                 Your chart might have axes to help give a clearer picture of the scales in relation to the data.
               </li>
               <li>
-                And finally, your chart may have animations, which help guide you user to understand deeper relationships in their data
+                And finally, your chart may have animations, which help guide your audience to understand deeper relationships in their data
                 over different scales or even chart types. We'll come back to this in a bit.
               </li>
             </ul>
@@ -165,10 +179,34 @@ export default class Presentation extends React.Component {
               <Appear><ListItem textColor="primary">Animations</ListItem></Appear>
             </List>
           </Slide>
+          <Slide transition={["zoom", "slide"]} bgColor="primary" notes="
+            <ul>
+              <li>
+                A chart is a
+              </li>
+              <li>
+
+              </li>
+              <li>
+                Once you think in terms of composing the underlying grammar, you can create something much more suited to your dataset / story than any one type of chart
+              </li>
+            </ul>
+          ">
+            <Heading size={1} caps lineHeight={1} textColor="tertiary">
+              Graphics vs Charts
+            </Heading>
+            <List>
+              <ListItem textColor="secondary">Chart is composed of objects (shapes): pie chart, bar chart, line chart</ListItem>
+              <ListItem textColor="secondary">Graphic is composed of primitives of a chart or charts</ListItem>
+              <ListItem textColor="secondary">Once operating in terms of these primitives, you can create your own visualizations</ListItem>
+            </List>
+          </Slide>
           <Slide transition={["slide"]} bgColor="secondary" notes="
               Most graphics tools (like Excel or Tableau) take in data and output predefined chart types.
               They're easy to use, but masively limiting.
-              It's really hard to do anything more advanced than just basic manipulation with these types of tools.
+              The grammar is strict: you are limited to what the tool gives you.
+
+              It's really hard to do anything more advanced than just basic manipulation of their predefined charts with these types of tools.
               Even some programming language tools, like C3 or Highcharts, give you more customization, but are still severly limited.
           ">
             <Heading size={1} caps lineHeight={1} textColor="primary">
@@ -183,11 +221,15 @@ export default class Presentation extends React.Component {
             </Appear>
           </Slide>
           <Slide transition={["spin"]} bgColor="primary" notes="
-            D3 takes the opposite tact. *It doesn't come with a notion of a graphical grammar at all.*
+            D3 takes the opposite tact. *Most of D3 doesn't come with a notion of a graphical grammar at all.*
             What it gives you is a way to bridge your data to a presentation layer.
             D3 doesn't know what a bar chart is. You create the rectangles that make up a bar chart, then assign each bar's
             position, color, height, width, etc.
-            This gives you much more flexibility.
+            This is slower but it gives you much more flexibility.
+            Where SVG has the necessary primitives for a given chart type, D3 encourages you to use the D3 primitives
+            with the web standards. The scale is enough for you to use alone.
+            Where SVG falls short of needed pieces of visualization grammar, like axes and arcs and chords,
+            D3 provides these tools, bult on top of SVG, for you.
           ">
             <Heading size={1} caps lineHeight={1} textColor="secondary">
               D3
@@ -196,10 +238,40 @@ export default class Presentation extends React.Component {
               Data => D3 Primitives (Scales, Shapes) => Chart
             </Text>
           </Slide>
+          <Slide transition={["slide"]} bgColor="secondary" notes="
+            This is from the paper introducing D3 for the first time.
+            Basically this is a really dense way of saying D3 maps an individual piece of data from
+            your dataset to a concrete representation on the screen (say a circle or a rectangle),
+            which is positioned by attributes of the datum.
+          ">
+            <BlockQuote>
+              <Quote textSize="18px" lineHeight={1.6}>
+                D3 is not a traditional visualization framework. Rather than introduce
+                a novel graphical grammar, D3 solves a different, smaller problem:
+                efficient manipulation of documents based on data. Thus D3’s core
+                contribution is a visualization “kernel” rather than a framework, and
+                its closest analogues are other document transformers such as jQuery,
+                CSS and XSLT. As the document model directly specifies graphical
+                primitives, D3 also bears a resemblance to low-level graphics libraries
+                such as Processing and Raphael. For high-level capability, D3 includes ¨
+                a collection of helper modules that sit on top of the selection-based
+                kernel; these modules are heavily influenced by prior visualization
+                systems, including Protovis
+              </Quote>
+              <Cite>
+                <Link href="http://vis.stanford.edu/files/2011-D3-InfoVis.pdf" textColor="primary">
+                  D3: Data-Driven Documents (Bostock et al) - 2011
+                </Link>
+              </Cite>
+            </BlockQuote>
+          </Slide>
           <Slide transition={["fade"]} bgColor="tertiary" notes="
             One of the core primitives of D3, scales, can be used to map the world of your data (called the *domain*) to the 'renderer' (called the *range*)
             In most cases that would be the DOM, SVG or Canvas.
-            You can also project geography (say countries or states), from a coordinate system like Latitude / Longitude to the coordinates on your screen.
+            You can also project geography (say countries or states), from a coordinate system like Latitude / Longitude to the 2D cartesian coordinates on your screen.
+            It gives you an easy way of mapping one interval of values to another.
+            It doesn't have to be positional. It can be other attributes like color or size too.
+            * If you map a value from your dataset to a shape's size, you are giving that size meaning. *
           ">
             <Heading size={1} caps lineHeight={1} textColor="primary">
               Scales
@@ -261,6 +333,7 @@ export default class Presentation extends React.Component {
           <CodeSlide
             lang="js"
             transition={["slide", "fade"]}
+            textSize="26px"
             code={require("raw!../assets/deck.example")}
             ranges={[
               { loc: [26, 26], title: "Let's make a bar chart"},
@@ -284,9 +357,10 @@ export default class Presentation extends React.Component {
           />
           <Slide transition={["slide"]} bgColor="secondary" notes="
             It's not a huge leap then, with D3, to take the core language of a bar chart and tweak it to say something more advanced.
-            This image, by Szabo Haslam, shows a waveform of Aphex Twin.
+            This image, by Szabo Haslam, shows a waveform of an Aphex Twin song.
             It retains the language of a bar chart, mapping the song's amplitude to bar height.
-            But instead of treating the x-axis as simply in the horizontal plane, the x-axis in this graphic is radial around a circle
+            But instead of treating the x-axis as simply in the horizontal plane, the x- and y-axes in this graphic are polar.
+            Instead of using x-position and y-position, the scales are angular and radial, but otherwise the graphic is identical to a bar chart.
           ">
             <Image src={images.waveform} width={"100%"} />
             <Text>
@@ -296,16 +370,24 @@ export default class Presentation extends React.Component {
             </Text>
           </Slide>
           <Slide transition={["slide"]} bgColor="secondary" notes="
-            Similarly, these radial bar chart
+            Similarly, these radial bar chart designs use a grammar of hight representing some value, or angular size representing
+            a part of a whole.
           ">
-            <Layout>
-              <Fill>
-                <Image src={images.circularBarchart} width={"100%"} />
-              </Fill>
-              <Fill>
-                <Image src={images.oilChart} width={"100%"} />
-              </Fill>
-            </Layout>
+            <Table>
+              <TableRow>
+                <TableItem>
+                  <Image src={images.circularBarchart} width="50%" />
+                </TableItem>
+                <TableItem>
+                  <Image src={images.oilChart} width="100%" />
+                </TableItem>
+              </TableRow>
+              <TableRow>
+                <TableItem>
+                  <Image src={images.arcChart} width="100%" />
+                </TableItem>
+              </TableRow>
+            </Table>
           </Slide>
           <Slide transition={["spin"]} notes="
               Quickly, we'll also cover scatterplot.
@@ -333,42 +415,21 @@ export default class Presentation extends React.Component {
                 </List>
               </Fill>
               <Fill>
-                <Heading size={4} caps textColor="secondary" bgColor="white" margin={10}>
-                  Right
-                </Heading>
+                <Image src={images.scatterplot} width="100%" margin="30px" />
               </Fill>
             </Layout>
           </Slide>
           <Slide transition={["zoom"]} notes="
             We can similarly combine the language of a bar chart with a scatterplot to create an even more advanced
-            visualization, without much extra code. This would be nearly impossible to do in Excel, but in D3 it's actually
+            graphic, without much extra code. This would be nearly impossible to do in Excel, but in D3 it's actually
             pretty straightforward.
           ">
-            <Text>
-            </Text>
+            <Image src={images.nytWeather} width="100%" />
           </Slide>
           <Slide transition={["slide"]} bgImage={images.sunset.replace("/", "")} bgDarken={0.75}>
             <Heading size={1} caps fit textColor="primary">
               Demo
             </Heading>
-          </Slide>
-          <Slide transition={["zoom", "fade"]} bgColor="primary">
-            <Heading caps fit>Flexible Layouts</Heading>
-            <Layout>
-              <Fill>
-                <Heading size={4} caps textColor="secondary" bgColor="white" margin={10}>
-                  Left
-                </Heading>
-              </Fill>
-              <Fill>
-                <Heading size={4} caps textColor="secondary" bgColor="white" margin={10}>
-                  Right
-                </Heading>
-              </Fill>
-            </Layout>
-          </Slide>
-          <Slide transition={["slide"]} bgColor="primary">
-            <BarChart />
           </Slide>
           <Slide transition={["spin", "slide"]} bgColor="tertiary" notes="Any questions?">
             <Heading size={1} caps fit lineHeight={1.5} textColor="primary">
