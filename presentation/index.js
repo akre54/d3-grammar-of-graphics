@@ -32,6 +32,7 @@ import createTheme from 'spectacle/lib/themes/default'
 
 // Import custom component
 import BarChart from '../assets/bar_chart'
+import Proportion from '../assets/proportion'
 
 // Require CSS
 require('normalize.css')
@@ -42,8 +43,12 @@ const images = {
   city: require('../assets/city.jpg'),
   twonlogo: require('../assets/2n_logo_black.png'),
   barchart: require('../assets/lets-make-a-barchart.png'),
-  // demo: require('../assets/waves.jpeg'),
-  demo: require('../assets/sunset.jpeg'),
+  sunset: require('../assets/sunset.jpeg'),
+  waves: require('../assets/waves.jpeg'),
+  waveform: require('../assets/waveform.jpg'),
+  circularBarchart: require('../assets/circular_bar_chart.png'),
+  scale: require('../assets/d3scale.png'),
+  oilChart: require('../assets/oilchart.jpg'),
   grammarOfGraphics: require('../assets/grammar_of_graphics.jpg')
 }
 
@@ -67,7 +72,7 @@ export default class Presentation extends React.Component {
               Building a Graphical Grammar in D3
             </Heading>
             <Heading size={3} fit textColor="secondary" textFont="primary">
-              (or: Why is D3 built like that?)
+              (or: Why is D3 so complicated?)
             </Heading>
           </Slide>
           <Slide transition={["zoom"]} bgColor="primary" notes="
@@ -91,21 +96,23 @@ export default class Presentation extends React.Component {
           <Slide transition={["slide"]} bgColor="secondary" notes="
               Just to gauge the room: How many people here have used D3 before?
               How many are intermediate in D3?
+              Ok. And how many would say they're advanced?
             ">
             <Heading size={1} caps lineHeight={1} textColor="primary">
               D3?
             </Heading>
           </Slide>
-          <Slide transition={["slide"]} bgColor="secondary" notes="
+          <Slide transition={["slide"]} bgImage={images.waves.replace("/", "")} bgDarken={0.75} notes="
             We're going to start with some definitions, then apply them to making a bar chart, then make the bar chart a bit fancy, then finally finish with a demo of TalentLab, a really cool app bult by some of my colleagues">
             <List>
               <ListItem textColor="primary">Definitions</ListItem>
-              <ListItem textColor="primary">Let's make a bar chart (fancy)</ListItem>
+              <ListItem textColor="primary">Let's make a chart</ListItem>
               <ListItem textColor="primary">Demo</ListItem>
             </List>
           </Slide>
           <Slide transition={["fade"]} bgColor="primary" notes="
-            Let's get some definitions out of the way. I want to quickly define what a graphic is and what a grammar is, and then I want to show how they apply to something like a bar chart or a scatterplot.
+            Let's get some definitions out of the way.
+            I want to quickly define what a graphic is and what a grammar is, and then I want to show how they apply to something like a bar chart or a scatterplot.
           ">
             <Heading size={1} caps lineHeight={1} textColor="secondary">
               Definitions
@@ -119,18 +126,20 @@ export default class Presentation extends React.Component {
           </Slide>
           <Slide transition={["slide"]} notes="
             Some visual representation of data, allows us to gain deeper insight into a story than just words or a dataset alone could.
+            There are many different types of graphics. Here are a few just to get a sense. I want you to pay attention to how the shapes retain or change their meaning as the type of graphic changes
           ">
-            <Heading size={1} caps lineHeight={1} margin="20px auto" textColor="secondary">
+            <Heading size={1} caps lineHeight={1} margin="30px auto" textColor="secondary">
               What is a "graphic"?
             </Heading>
             <video src={videos.d3reel} height={360} width={640} autoPlay loop muted />
           </Slide>
           <Slide transition={["zoom"]} bgColor="secondary" notes="
-            [NOTE TO AK: click next to show slide!!]
+            [NOTE TO AK: click next to show slide!!] We are going to simplyfy a bit.
             <ul>
               <li>Think of the language of graphics like any other language.
                   It's composed of smaller pieces. In this case, shapes, colors, positions, size, are the words, sentences, nouns, verbs, all the parts that make up a language.
                   A grammar is a way of referring to the parts that make up the graphic.
+                  More generally, it's how we assign meaning to what we see in the graphic.
               </li>
               <li>
                 You might represent categories by using distinct colors or shapes, or you might map
@@ -138,8 +147,7 @@ export default class Presentation extends React.Component {
                 We call these 'Scales'
               </li>
               <li>
-                Your chart might have axes to help give a clearer picture of the scales in relation to the data. It's usually
-                represented as a line with tick marks every so often to delimit change.
+                Your chart might have axes to help give a clearer picture of the scales in relation to the data.
               </li>
               <li>
                 And finally, your chart may have animations, which help guide you user to understand deeper relationships in their data
@@ -160,6 +168,8 @@ export default class Presentation extends React.Component {
           <Slide transition={["slide"]} bgColor="secondary" notes="
               Most graphics tools (like Excel or Tableau) take in data and output predefined chart types.
               They're easy to use, but masively limiting.
+              It's really hard to do anything more advanced than just basic manipulation with these types of tools.
+              Even some programming language tools, like C3 or Highcharts, give you more customization, but are still severly limited.
           ">
             <Heading size={1} caps lineHeight={1} textColor="primary">
               Most graphics tools
@@ -175,6 +185,9 @@ export default class Presentation extends React.Component {
           <Slide transition={["spin"]} bgColor="primary" notes="
             D3 takes the opposite tact. *It doesn't come with a notion of a graphical grammar at all.*
             What it gives you is a way to bridge your data to a presentation layer.
+            D3 doesn't know what a bar chart is. You create the rectangles that make up a bar chart, then assign each bar's
+            position, color, height, width, etc.
+            This gives you much more flexibility.
           ">
             <Heading size={1} caps lineHeight={1} textColor="secondary">
               D3
@@ -183,21 +196,22 @@ export default class Presentation extends React.Component {
               Data => D3 Primitives (Scales, Shapes) => Chart
             </Text>
           </Slide>
-          <Slide transition={["fade"]} bgColor="secondary" notes="
-            D3 is a way of mapping the world of your data to the 'renderer'
-            One of the core primitives of D3, scales, can be used to
-            You can also project
+          <Slide transition={["fade"]} bgColor="tertiary" notes="
+            One of the core primitives of D3, scales, can be used to map the world of your data (called the *domain*) to the 'renderer' (called the *range*)
             In most cases that would be the DOM, SVG or Canvas.
+            You can also project geography (say countries or states), from a coordinate system like Latitude / Longitude to the coordinates on your screen.
           ">
             <Heading size={1} caps lineHeight={1} textColor="primary">
               Scales
             </Heading>
-            <Text lineHeight={1} textColor="tertiary">
+            <Image src={images.scale} width="100%" margin="50px auto" />
+            <Text lineHeight={1} textColor="secondary">
               Map or project data from data to renderer
             </Text>
           </Slide>
           <Slide transition={["spin"]} bgColor="secondary" notes="
-
+            Scales take a value from our dataset in, and return a value that can be displayed.
+            For simple linear scales, this is very similar to proportions, which we learned in 4th grade.
           ">
             <Heading size={1} caps lineHeight={2} textColor="primary">
               Scales
@@ -205,7 +219,9 @@ export default class Presentation extends React.Component {
             <CodePane
               lang='js'
               source={require('raw!../assets/scale.example')}
+              margin="20px auto 100px auto"
             />
+            <Proportion />
           </Slide>
           <Slide transition={["slide"]} bgImage={images.city.replace("/", "")} bgDarken={0.75}>
             <Heading size={1} caps fit textColor="primary">
@@ -214,12 +230,12 @@ export default class Presentation extends React.Component {
             <Heading size={1} caps fit textColor="tertiary">
               Scales, Colors, Shapes, Axes
             </Heading>
-            <Heading size={1} caps fit textColor="primary">
-
-            </Heading>
           </Slide>
           <Slide transition={["fade"]} bgColor="secondary" notes="
-            Let's look at what a bar chart is made up of. This chart shows the relative frequency of letters in the English language.
+            Let's look at what a bar chart is made up of.
+            This chart shows the relative frequency of letters in the English language.
+            A bar chart is effective because it allows us to compare relative amounts of discrete
+            data, such as the letters in this example.
             <ul>
               <li>
                 Shapes: Each bar is a rectangle. Simple.
@@ -227,13 +243,16 @@ export default class Presentation extends React.Component {
               <li>
                 Scales:
                 The height of each bar is mapped to the 'frequency' variable from our dataset.
-                The width is mapped to how ever many categories there are. In this case, each bar a 26th of the graphic width
+                The width is mapped to however many categories there are.
+                In this case, each bar a 26th of the graphic width because there are 26 letters.
               </li>
               <li>
-                Color: Could also represent a quantity. In this case, we're using color to
+                Color: Could also represent a quantity.
+                In this case, we're using color for interaction purposes.
+                Hovering over a bar highlights it.
               </li>
               <li>
-                Axes:
+                Axes: Allow us to reference the quantity represented by the bar height
               </li>
             </ul>
           ">
@@ -263,6 +282,31 @@ export default class Presentation extends React.Component {
               With that in mind. Let's make a bar chart
             "
           />
+          <Slide transition={["slide"]} bgColor="secondary" notes="
+            It's not a huge leap then, with D3, to take the core language of a bar chart and tweak it to say something more advanced.
+            This image, by Szabo Haslam, shows a waveform of Aphex Twin.
+            It retains the language of a bar chart, mapping the song's amplitude to bar height.
+            But instead of treating the x-axis as simply in the horizontal plane, the x-axis in this graphic is radial around a circle
+          ">
+            <Image src={images.waveform} width={"100%"} />
+            <Text>
+              <Link href="http://www.szabohaslam.co.uk/waveform-soundwave-posters.html" textColor="primary">
+                Waveform series, by Szabo Haslam
+              </Link>
+            </Text>
+          </Slide>
+          <Slide transition={["slide"]} bgColor="secondary" notes="
+            Similarly, these radial bar chart
+          ">
+            <Layout>
+              <Fill>
+                <Image src={images.circularBarchart} width={"100%"} />
+              </Fill>
+              <Fill>
+                <Image src={images.oilChart} width={"100%"} />
+              </Fill>
+            </Layout>
+          </Slide>
           <Slide transition={["spin"]} notes="
               Quickly, we'll also cover scatterplot.
               In a scatterplot, you are usually comparing 2 variables on the x- and y-axes.
@@ -295,7 +339,15 @@ export default class Presentation extends React.Component {
               </Fill>
             </Layout>
           </Slide>
-          <Slide transition={["slide"]} bgImage={images.demo.replace("/", "")} bgDarken={0.75}>
+          <Slide transition={["zoom"]} notes="
+            We can similarly combine the language of a bar chart with a scatterplot to create an even more advanced
+            visualization, without much extra code. This would be nearly impossible to do in Excel, but in D3 it's actually
+            pretty straightforward.
+          ">
+            <Text>
+            </Text>
+          </Slide>
+          <Slide transition={["slide"]} bgImage={images.sunset.replace("/", "")} bgDarken={0.75}>
             <Heading size={1} caps fit textColor="primary">
               Demo
             </Heading>
@@ -315,41 +367,10 @@ export default class Presentation extends React.Component {
               </Fill>
             </Layout>
           </Slide>
-          <Slide transition={["slide"]} bgColor="secondary">
-            <BlockQuote>
-              <Quote>Wonderfully formatted quotes</Quote>
-              <Cite>Ken Wheeler</Cite>
-            </BlockQuote>
-          </Slide>
-          <Slide transition={["spin", "zoom"]} bgColor="tertiary">
-            <Heading caps fit size={1} textColor="primary">
-              Inline Markdown
-            </Heading>
-            <Markdown>
-              {`
-
-You can write inline images, [Markdown Links](http://commonmark.org), paragraph text and most other markdown syntax
-* Lists too!
-* With ~~strikethrough~~ and _italic_
-* And lets not forget **bold**
-              `}
-            </Markdown>
-          </Slide>
-          <Slide transition={["slide", "spin"]} bgColor="primary">
-            <Heading caps fit size={1} textColor="tertiary">
-              Smooth
-            </Heading>
-            <Heading caps fit size={1} textColor="secondary">
-              Combinable Transitions
-            </Heading>
-          </Slide>
           <Slide transition={["slide"]} bgColor="primary">
-            <Heading size={1} caps fit textColor="tertiary">
-              Your presentations are interactive
-            </Heading>
             <BarChart />
           </Slide>
-          <Slide transition={["spin", "slide"]} bgColor="tertiary">
+          <Slide transition={["spin", "slide"]} bgColor="tertiary" notes="Any questions?">
             <Heading size={1} caps fit lineHeight={1.5} textColor="primary">
               Thanks!
             </Heading>
